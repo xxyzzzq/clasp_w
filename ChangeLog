@@ -1,0 +1,32 @@
+=================
+2013-08-15  Zhiqiang Zhang
+  * v1.1.4
+  * bug fix
+  * added stopper check when new model found (in order to record the instant time)
+
+=================
+2013-07-22  Zhiqiang Zhang
+  * v1.1.3
+  * added pthread_testcancel in resolveConflict to speed up forced termination
+
+=================
+2013-07-22  Zhiqiang Zhang
+  * v1.1.2
+  * modified the window termination mechanism
+
+=================
+2013-07-22  Zhiqiang Zhang
+  * v1.1.1
+  * added the c2 termination mechanism
+
+=================
+2013-07-09  Zhiqiang Zhang
+  * v1.1.0
+  * upgraded to clasp-2.1.3
+  * fixed bugs of the window termination mechanism
+
+=================
+2012-07-05  Zhiqiang Zhang
+  * v1.0
+  * initial version
+

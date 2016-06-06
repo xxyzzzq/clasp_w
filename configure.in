@@ -1,0 +1,38 @@
+#                                               -*- Autoconf -*-
+# Process this file with autoconf to produce a configure script.
+
+AC_PREREQ([2.5.0])
+AC_INIT([clasp_w], m4_esyscmd([tr -d '\n' < VERSION]), [zhangzq@ios.ac.cn])
+AC_CONFIG_SRCDIR([clasp_w/main.cpp])
+AC_CONFIG_HEADERS([config.h])
+
+AM_INIT_AUTOMAKE([1.9 tar-pax])
+
+# Checks for programs.
+AC_PROG_CXX
+AC_PROG_CC
+AC_PROG_RANLIB
+
+# Checks for libraries.
+
+# Checks for header files.
+AC_LANG_PUSH([C++])
+AC_CHECK_HEADERS([boost/shared_ptr.hpp],[],[AC_MSG_ERROR(You need the Boost libraries.)])
+AC_LANG_POP([C++])
+
+AM_CONDITIONAL([IS_DARWIN], [test -n "`uname | grep -i Darwin`"])
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_HEADER_STDBOOL
+AC_TYPE_SIZE_T
+
+CXXFLAGS+=" -D WITH_THREADS=0"
+
+# Checks for library functions.
+AC_CONFIG_FILES([Makefile
+                 libclasp/Makefile
+                 clasp_w/Makefile]
+                )
+
+AC_OUTPUT
+

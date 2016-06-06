@@ -1,0 +1,88 @@
+INTRODUCTION
+---------------
+Clasp_W is a modified version of the Clasp solver.
+This distribution package is modified based on clasp-2.0.6.
+It provides a window mechanism for stopping the solver
+earlier when a relatively good solution is found.
+
+For detailed information of Clasp, please look at
+http://www.cs.uni-potsdam.de/clasp/
+
+The Linux binaries is built on Ubuntu 11.10, please use
+"ldd" to check whether the shared libraries are linked correctly.
+
+LICENSE
+---------------
+clasp is part of the Potassco project hosted at SourceForge.
+It is distributed under the GNU Public License. And Clasp_W
+is a derived work based on clasp, so it is also distributed
+as a whole under the GNU Public License. See COPYING.gpl for
+details regarding the license.
+
+For the Windows distribution, Cascade uses POSIX Threads for Windows v2.9.1,
+which is under GNU Lesser Public License v2.1.
+
+USAGE
+---------------
+clasp_w [options] [input-file]
+
+Clasp_W takes an input file which must conforms to the standard
+PB solver requirements (ref. http://www.cril.univ-artois.fr/PB09/solver_req.html)
+If no input file is specified, Clasp_W will take input from the standard
+input (Ctrl-D for EOF for Linux, and Ctrl-Z for Windows).
+
+Options:
+  -w default|<a>,<b>,<c>
+    This option is only works when an objective function exists.
+    If not, it taks no effect.
+    
+    By default, the -w option is not specified, the solver will
+    terminate until the optimum solution is found.
+    
+    However, sometimes the user may want the solver to terminate
+    earlier when it has already found a good solution. Clasp_W
+    provides a window mechanism for early termination. Typically,
+    the diagram of the best objective function to the time is like
+    the following:
+    
+    obj func value
+    |
+  y2|----------------------------------------
+    |                       /               |
+  y1|-----------------------                |
+    |             /|                        |
+    |          --  |                        |
+    |         /    |                        |
+    |       -      |                        |
+    |      /       |                        |
+    |     /        |                        |
+    |    /         |                        |
+    |   /          |                        |
+    |  /           |                        |
+    | |            |                        |
+    | /            |                        |
+    |/             |                        |
+    ____________________________________________ time
+                  x1                       x2
+
+    We want to terminate when the solver begins to find new solutions
+    very slow. The window mechanism is like this:
+      Suppose the current time & best value are x2,y2, and the time &
+      best value at an previous time point are x1,y1. Here we fix the
+      ratio of x1 to x2. If y1>d*y2, then we can judge the solver is
+      entering the hard zone, and it will stop.
+    
+    The four parameters a,b,c respectively stands for:
+      a:  Minimum timeout. The window mechanism will not work until the
+          solving time is greater than a (in milliseconds).
+      b:  The ratio of window size to x2, i.e. (x2-x1)/x2. Note that
+          when x2 becomes large, (x2-x1) will increase too, and (x2-x1)
+          should not be greater than b.
+      c:  The ratio of x1 to x2, i.e. x1/x2.
+  
+  -s <value>
+    This option can be used with -w option. This is to specify the start
+    value point. The value passed to the window is the difference of <value>
+    and the current best value. (negative differences will be considered
+    as zero)
+
