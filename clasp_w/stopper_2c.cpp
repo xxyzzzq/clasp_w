@@ -25,8 +25,8 @@ THE SOFTWARE.
 
 using namespace Clasp_W;
 
-Stopper_2C::Stopper_2C(const boost::shared_ptr<Criterion> &primary_criterion,
-                                     const boost::shared_ptr<Criterion> &secondary_criterion,
+Stopper_2C::Stopper_2C(const std::shared_ptr<Criterion> &primary_criterion,
+                                     const std::shared_ptr<Criterion> &secondary_criterion,
                                      double k,
                                      double threshold)
     : Stopper() {
