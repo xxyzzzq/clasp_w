@@ -27,7 +27,7 @@ THE SOFTWARE.
 #include <vector>
 #include <iostream>
 #include <pthread.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <clasp/clasp_facade.h>
 #include "clock.h"
 #include "stopper.h"
@@ -52,8 +52,8 @@ public:
   bool isSolutionFound(void) const;
   bool isFinished(void) const;
 
-  void setStopper(const boost::shared_ptr<Stopper> &stopper );
-  const boost::shared_ptr<Stopper> &getStopper(void) const {
+  void setStopper(const std::shared_ptr<Stopper> &stopper );
+  const std::shared_ptr<Stopper> &getStopper(void) const {
     return stopper_;
   }
   void setStartValue(int start_value);
@@ -67,11 +67,10 @@ public:
 
 private:
   void resetStats(void);
-  bool stopCriteria(void) const;
   void setJumpy(void);
 
 private:
-  boost::shared_ptr<Clasp::ClaspConfig> claspconfig_;
+  std::shared_ptr<Clasp::ClaspConfig> claspconfig_;
   unsigned int srand_;
   bool is_rand_;
   bool is_debug_;
@@ -83,7 +82,7 @@ private:
   int64 start_value_;
   std::vector<bool> best_model_;
   Clasp_W::Clock clock_;  // only use with solve with time out
-  boost::shared_ptr<Stopper> stopper_;
+  std::shared_ptr<Stopper> stopper_;
   pthread_mutex_t stats_lock_;
 
   std::istream *ins_;

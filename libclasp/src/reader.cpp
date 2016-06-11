@@ -48,9 +48,7 @@ static int mkstemp(char* templ) {
 }
 #endif
 static const char* getTempPath() { 
-	if (const char* x1 = getenv("TMP"))  return x1;
-	if (const char* x2 = getenv("TEMP")) return x2;
-	return P_tmpdir;
+	return ".";
 }
 namespace Clasp {
 ReadError::ReadError(unsigned line, const char* msg) : ClaspError(format(line, msg)), line_(line) {}

@@ -28,8 +28,7 @@ THE SOFTWARE.
 #include <fstream>
 #include <sstream>
 #include <vector>
-#include <boost/shared_ptr.hpp>
-#include <boost/algorithm/string.hpp>
+#include <memory>
 #include <clasp/clasp_facade.h>
 #include <clasp/reader.h>
 #include "clasp_solver.h"
@@ -40,7 +39,25 @@ THE SOFTWARE.
 
 using namespace Clasp_W;
 
-bool process_arg_w(const char *arg, boost::shared_ptr<Stopper> &stopper_w) {
+namespace {
+std::vector<std::string> split(const std::string &str, char delim) {
+  std::vector<std::string> result;
+  std::string tmp;
+  for (std::size_t i = 0; i < str.size(); ++i) {
+    if (str[i] == delim) {
+      if (!tmp.empty()) {
+        result.push_back(tmp);
+        tmp.clear();
+      }
+      continue;
+    }
+    tmp.push_back(str[i]);
+  }
+  return result;
+}
+}
+
+bool process_arg_w(const char *arg, std::shared_ptr<Stopper> &stopper_w) {
   std::string opt = arg;
   if (opt == "default") {
     opt = "2000,0.9,3.0";
@@ -49,8 +66,7 @@ bool process_arg_w(const char *arg, boost::shared_ptr<Stopper> &stopper_w) {
     return false;
   }
   
-  std::vector<std::string> opts;
-  boost::split(opts, arg, boost::is_any_of(","));
+  std::vector<std::string> opts = split(arg, ',');
   if (opts.size() != 3) {
     return false;
   }
@@ -65,15 +81,14 @@ bool process_arg_w(const char *arg, boost::shared_ptr<Stopper> &stopper_w) {
   return true;
 }
 
-bool process_arg_c(const char *arg, boost::shared_ptr<Stopper> &stopper_c) {
+bool process_arg_c(const char *arg, std::shared_ptr<Stopper> &stopper_c) {
   std::string opt = arg;
   
   if (opt.size() <= 0) {
     return false;
   }
 
-  std::vector<std::string> opts;
-  boost::split(opts, arg, boost::is_any_of(","));
+  std::vector<std::string> opts = split(arg, ',');
   if (opts.size() != 5) {
     return false;
   }
@@ -86,8 +101,8 @@ bool process_arg_c(const char *arg, boost::shared_ptr<Stopper> &stopper_c) {
   double ratio_y = atof(opts[2].c_str());
   double k = atof(opts[3].c_str());
   double threshold = atof(opts[4].c_str());
-  boost::shared_ptr<Criterion_Exp> c_exp(new Criterion_Exp(exp));
-  boost::shared_ptr<Criterion_Window> c_win(new Criterion_Window(min_time_out, ratio_y));
+  std::shared_ptr<Criterion_Exp> c_exp(new Criterion_Exp(exp));
+  std::shared_ptr<Criterion_Window> c_win(new Criterion_Window(min_time_out, ratio_y));
   stopper_c.reset(new Stopper_2C(c_exp, c_win, k, threshold));
   return true;
 }
@@ -96,7 +111,7 @@ int main(int argc, char *argv[]) {
   int opt_ubound = 0;
   std::istream *ins = &std::cin;
   std::vector<std::string> other_args;
-  boost::shared_ptr<Stopper> stopper_w, stopper_c;
+  std::shared_ptr<Stopper> stopper_w, stopper_c;
   unsigned int srand = 1;
   bool is_rand = false;
   bool is_debug = false;

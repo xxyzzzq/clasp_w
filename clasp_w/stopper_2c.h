@@ -24,7 +24,7 @@ THE SOFTWARE.
 #ifndef STOPPER_2C_H__
 #define STOPPER_2C_H__
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <clasp/util/platform.h>
 #include "stopper.h"
 #include "criterion.h"
@@ -32,8 +32,8 @@ THE SOFTWARE.
 namespace Clasp_W {
 class Stopper_2C : public Stopper {
 public:
-  Stopper_2C( const boost::shared_ptr<Criterion> &primary_criterion,
-              const boost::shared_ptr<Criterion> &secondary_criterion,
+  Stopper_2C( const std::shared_ptr<Criterion> &primary_criterion,
+              const std::shared_ptr<Criterion> &secondary_criterion,
               double k,
               double threshold);
   Stopper_2C(const Stopper_2C &from);
@@ -50,8 +50,8 @@ private:
   virtual double evaluate_func(double c_1, double c_2) const;
   
 private:
-  boost::shared_ptr<Criterion> primary_criterion_;
-  boost::shared_ptr<Criterion> secondary_criterion_;
+  std::shared_ptr<Criterion> primary_criterion_;
+  std::shared_ptr<Criterion> secondary_criterion_;
   double threshold_;
   double k_;
 };

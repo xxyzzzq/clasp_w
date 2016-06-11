@@ -107,7 +107,7 @@ bool aligned(void* mem) {
 template <bool> struct static_assertion;
 template <>     struct static_assertion<true> {};
 
-#if !defined(__cplusplus) || (__cplusplus < 201103L && !defined(static_assert))
+#if !defined(__cplusplus) || (__cplusplus < 201103L && !defined(static_assert) && (!defined(_MSC_VER) || _MSC_VER < 1900))
 #define static_assert(x, message) (void)sizeof(static_assertion< (x) >)
 #endif
 

@@ -210,7 +210,7 @@ bool Clasp_Solver::isFinished(void) const {
   return this->is_finished_;
 }
   
-void Clasp_Solver::setStopper(const boost::shared_ptr<Stopper> &stopper) {
+void Clasp_Solver::setStopper(const std::shared_ptr<Stopper> &stopper) {
   this->stopper_ = stopper;
 }
 
