@@ -53,6 +53,8 @@ std::vector<std::string> split(const std::string &str, char delim) {
     }
     tmp.push_back(str[i]);
   }
+  if (!tmp.empty())
+    result.push_back(tmp);
   return result;
 }
 }
