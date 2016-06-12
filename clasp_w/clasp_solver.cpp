@@ -34,6 +34,8 @@ THE SOFTWARE.
 #define NOMINMAX
 #include <Windows.h>
 #define usleep(x) Sleep(x/1000)
+#else  // _MSC_VER
+#include <unistd.h>
 #endif  // _MSC_VER
 
 using namespace Clasp_W;
@@ -83,7 +85,7 @@ public:
       {
         // check immediately here
         Clasp_Solver *solver = this->stats_;
-        if (solver->stopper_.get()) {
+        if (solver->stopper_) {
           if (solver->stopper_->check(solver->clock_.getTime(), solver->start_value_-solver->best_goal_value_)) {
 	          pthread_mutex_unlock(&this->stats_->stats_lock_);
             pthread_exit(0);
@@ -105,12 +107,18 @@ private:
 Clasp_Solver::Clasp_Solver(void) {
   this->srand_ = 0;
   this->start_value_ = 0;
+  this->stopper_ = 0;
+  this->claspconfig_ = 0;
   this->is_debug_ = false;
   pthread_mutex_init(&this->stats_lock_, 0);
   this->resetStats();
 }
 
 Clasp_Solver::~Clasp_Solver(void) {
+  if (this->claspconfig_)
+    delete this->claspconfig_;
+  if (this->stopper_)
+    delete this->stopper_;
 }
   
 Clasp_Solver::Clasp_Solver(const Clasp_Solver& from) {
@@ -122,7 +130,7 @@ Clasp_Solver::Clasp_Solver(const Clasp_Solver& from) {
   this->is_debug_ = from.is_debug_;
   this->is_finished_ = from.is_finished_;
   this->clock_ = from.clock_;
-  this->stopper_.reset(this->stopper_->clone());
+  this->stopper_ = from.stopper_ ? from.stopper_->clone() : 0;
   this->start_value_ = from.start_value_;
   this->stats_lock_ = from.stats_lock_;
 }
@@ -136,7 +144,7 @@ const Clasp_Solver& Clasp_Solver::operator = (const Clasp_Solver& right) {
   this->is_debug_ = right.is_debug_;
   this->is_finished_ = right.is_finished_;
   this->clock_ = right.clock_;
-  this->stopper_.reset(this->stopper_->clone());
+  this->stopper_ = right.stopper_ ? right.stopper_->clone() : 0;
   this->start_value_ = right.start_value_;
   this->stats_lock_ = right.stats_lock_;
   return *this;
@@ -156,7 +164,7 @@ void Clasp_Solver::solve_timeout(void) {
   pthread_t tid;
   this->clock_.reset();
   pthread_create(&tid, 0, solver_proc, this);
-  if (this->stopper_.get()){
+  if (this->stopper_){
     while (true) {
       pthread_mutex_lock(&this->stats_lock_);
       if (this->is_started_ &&
@@ -180,7 +188,9 @@ void Clasp_Solver::solve(void) {
   this->resetStats();
   Clasp::ClaspFacade libclasp;
   StoreModelCallback cb(this);
-  this->claspconfig_.reset(new Clasp::ClaspConfig());
+  if (this->claspconfig_)
+    delete this->claspconfig_;
+  this->claspconfig_ = new Clasp::ClaspConfig();
   this->setJumpy();
   this->claspconfig_->master()->solver->strategies().rng.srand(this->srand_);
   if (this->is_rand_) {
@@ -210,7 +220,7 @@ bool Clasp_Solver::isFinished(void) const {
   return this->is_finished_;
 }
   
-void Clasp_Solver::setStopper(const std::shared_ptr<Stopper> &stopper) {
+void Clasp_Solver::setStopper(Stopper *stopper) {
   this->stopper_ = stopper;
 }
 
@@ -232,7 +242,7 @@ void Clasp_Solver::setIsRand(bool is_rand) {
 
 void Clasp_Solver::setIsDebug(bool is_debug) {
   this->is_debug_ = is_debug;
-  if (this->is_debug_ && this->stopper_.get()) {
+  if (this->is_debug_ && this->stopper_) {
     this->stopper_->setIsDebug(this->is_debug_);
   }
 }
@@ -247,7 +257,7 @@ void Clasp_Solver::resetStats(void) {
   this->is_finished_ = false;
   this->best_goal_value_ = std::numeric_limits<int>::max();
   this->best_model_.clear();
-  if (this->stopper_.get()) {
+  if (this->stopper_) {
     this->stopper_->clear();
   }
 }

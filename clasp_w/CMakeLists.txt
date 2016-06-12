@@ -4,7 +4,7 @@ file(
   *.cpp
   )
 
-set(PTHREAD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/pthread/)
+set(PTHREAD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/pthread)
 if(WIN32)
   if(CMAKE_CL_64)
     link_directories(${PTHREAD_DIR}/lib/x64)
@@ -23,17 +23,19 @@ target_link_libraries(clasp_w
   clasp ${PTHREAD_LIBRARY})
 
 if(WIN32)
+  get_target_property(BINARY_DIR clasp_w RUNTIME_OUTPUT_DIRECTORY)
+  message(${BINARY_DIR})
   if(CMAKE_CL_64)
     add_custom_command(TARGET clasp_w
       PRE_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy
-        ${PTHREAD_DIR}/lib/x64/pthreadVC2.dll
-        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+        ${PTHREAD_DIR}/dll/x64/pthreadVC2.dll
+        ${BINARY_DIR}/${CMAKE_CFG_INTDIR})
   else(CMAKE_CL_64)
     add_custom_command(TARGET clasp_w
       PRE_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy
-        ${PTHREAD_DIR}/lib/x86/pthreadVC2.dll
-        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+        ${PTHREAD_DIR}/dll/x86/pthreadVC2.dll
+        ${BINARY_DIR}/${CMAKE_CFG_INTDIR})
   endif(CMAKE_CL_64)
 endif(WIN32)
