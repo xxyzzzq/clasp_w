@@ -25,10 +25,10 @@ THE SOFTWARE.
 
 using namespace Clasp_W;
 
-Stopper_2C::Stopper_2C(const std::shared_ptr<Criterion> &primary_criterion,
-                                     const std::shared_ptr<Criterion> &secondary_criterion,
-                                     double k,
-                                     double threshold)
+Stopper_2C::Stopper_2C(Criterion *primary_criterion,
+                       Criterion *secondary_criterion,
+                       double k,
+                       double threshold)
     : Stopper() {
   this->primary_criterion_ = primary_criterion;
   this->secondary_criterion_ = secondary_criterion;
@@ -38,19 +38,27 @@ Stopper_2C::Stopper_2C(const std::shared_ptr<Criterion> &primary_criterion,
 
 Stopper_2C::Stopper_2C(const Clasp_W::Stopper_2C &from)
     : Stopper(from) {
-  this->primary_criterion_.reset(from.primary_criterion_->clone());
-  this->secondary_criterion_.reset(from.secondary_criterion_->clone());
+  this->primary_criterion_ = from.primary_criterion_ ?
+      from.primary_criterion_->clone() : 0;
+  this->secondary_criterion_ = from.secondary_criterion_ ?
+      from.secondary_criterion_->clone() : 0;
   this->threshold_ = from.threshold_;
   this->k_ = from.k_;
 }
 
 Stopper_2C::~Stopper_2C(void) {
+  if (this->primary_criterion_)
+    delete this->primary_criterion_;
+  if (this->secondary_criterion_)
+    delete this->secondary_criterion_;
 }
 
 const Stopper_2C &Stopper_2C::operator = (const Stopper_2C & right) {
   Stopper::operator =(right);
-  this->primary_criterion_.reset(right.primary_criterion_->clone());
-  this->secondary_criterion_.reset(right.secondary_criterion_->clone());
+  this->primary_criterion_ = right.primary_criterion_ ?
+      right.primary_criterion_->clone() : 0;
+  this->secondary_criterion_ = right.secondary_criterion_ ?
+      right.secondary_criterion_->clone() : 0;
   this->threshold_ = right.threshold_;
   this->k_ = right.k_;
   return *this;

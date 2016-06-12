@@ -52,8 +52,8 @@ public:
   bool isSolutionFound(void) const;
   bool isFinished(void) const;
 
-  void setStopper(const std::shared_ptr<Stopper> &stopper );
-  const std::shared_ptr<Stopper> &getStopper(void) const {
+  void setStopper(Stopper *stopper );
+  const Stopper *getStopper(void) const {
     return stopper_;
   }
   void setStartValue(int start_value);
@@ -70,7 +70,7 @@ private:
   void setJumpy(void);
 
 private:
-  std::shared_ptr<Clasp::ClaspConfig> claspconfig_;
+  Clasp::ClaspConfig *claspconfig_;  // owner
   unsigned int srand_;
   bool is_rand_;
   bool is_debug_;
@@ -82,7 +82,7 @@ private:
   int64 start_value_;
   std::vector<bool> best_model_;
   Clasp_W::Clock clock_;  // only use with solve with time out
-  std::shared_ptr<Stopper> stopper_;
+  Stopper *stopper_;  // owner
   pthread_mutex_t stats_lock_;
 
   std::istream *ins_;

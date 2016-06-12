@@ -32,8 +32,8 @@ THE SOFTWARE.
 namespace Clasp_W {
 class Stopper_2C : public Stopper {
 public:
-  Stopper_2C( const std::shared_ptr<Criterion> &primary_criterion,
-              const std::shared_ptr<Criterion> &secondary_criterion,
+  Stopper_2C( Criterion *primary_criterion,
+              Criterion *secondary_criterion,
               double k,
               double threshold);
   Stopper_2C(const Stopper_2C &from);
@@ -50,8 +50,8 @@ private:
   virtual double evaluate_func(double c_1, double c_2) const;
   
 private:
-  std::shared_ptr<Criterion> primary_criterion_;
-  std::shared_ptr<Criterion> secondary_criterion_;
+  Criterion *primary_criterion_;  // owner
+  Criterion *secondary_criterion_;  // owner
   double threshold_;
   double k_;
 };

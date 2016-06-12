@@ -57,40 +57,39 @@ std::vector<std::string> split(const std::string &str, char delim) {
 }
 }
 
-bool process_arg_w(const char *arg, std::shared_ptr<Stopper> &stopper_w) {
+Stopper *process_arg_w(const std::string &arg) {
   std::string opt = arg;
   if (opt == "default") {
     opt = "2000,0.9,3.0";
   }
   if (opt.size() <= 0) {
-    return false;
+    return 0;
   }
-  
+
   std::vector<std::string> opts = split(arg, ',');
   if (opts.size() != 3) {
-    return false;
+    return 0;
   }
   std::stringstream ss0(opts[0]);
   uint64 min_time_out;
   ss0 >> min_time_out;
 
-  stopper_w.reset(new Stopper_Window(
+  return new Stopper_Window(
       min_time_out,
       atof(opts[1].c_str()),
-      atof(opts[2].c_str())));
-  return true;
+      atof(opts[2].c_str()));
 }
 
-bool process_arg_c(const char *arg, std::shared_ptr<Stopper> &stopper_c) {
+Stopper *process_arg_c(const std::string &arg) {
   std::string opt = arg;
-  
+
   if (opt.size() <= 0) {
-    return false;
+    return 0;
   }
 
   std::vector<std::string> opts = split(arg, ',');
   if (opts.size() != 5) {
-    return false;
+    return 0;
   }
   int64 exp;
   std::stringstream ss0(opts[0]);
@@ -101,17 +100,17 @@ bool process_arg_c(const char *arg, std::shared_ptr<Stopper> &stopper_c) {
   double ratio_y = atof(opts[2].c_str());
   double k = atof(opts[3].c_str());
   double threshold = atof(opts[4].c_str());
-  std::shared_ptr<Criterion_Exp> c_exp(new Criterion_Exp(exp));
-  std::shared_ptr<Criterion_Window> c_win(new Criterion_Window(min_time_out, ratio_y));
-  stopper_c.reset(new Stopper_2C(c_exp, c_win, k, threshold));
-  return true;
+  Criterion_Exp *c_exp = new Criterion_Exp(exp);
+  Criterion_Window *c_win = new Criterion_Window(min_time_out, ratio_y);
+  return new Stopper_2C(c_exp, c_win, k, threshold);
 }
 
 int main(int argc, char *argv[]) {
   int opt_ubound = 0;
   std::istream *ins = &std::cin;
   std::vector<std::string> other_args;
-  std::shared_ptr<Stopper> stopper_w, stopper_c;
+  Stopper *stopper_w = 0;  // non-owner, will be passed to ClaspSolver.
+  Stopper *stopper_c = 0;  // non-owner, will be passed to ClaspSolver.
   unsigned int srand = 1;
   bool is_rand = false;
   bool is_debug = false;
@@ -127,7 +126,7 @@ int main(int argc, char *argv[]) {
     } else if (arg.size() <= 1) {
       std::cerr << "missing character after \"-\"" << std::endl;
     }
-    
+
     if (arg.substr(0,2) == "-w") {
       std::string arg1;
       if (arg.size() > 2) {
@@ -139,7 +138,8 @@ int main(int argc, char *argv[]) {
         }
         arg1 = argv[++i];
       }
-      if (!process_arg_w(arg1.c_str(), stopper_w)) {
+      stopper_w = process_arg_w(arg1);
+      if (!stopper_w) {
         std::cerr << "bad arguments for \"-w\"" << std::endl;
         return 1;
       }
@@ -156,7 +156,8 @@ int main(int argc, char *argv[]) {
         }
         arg1 = argv[++i];
       }
-      if (!process_arg_c(arg1.c_str(), stopper_c)) {
+      stopper_c = process_arg_c(arg1);
+      if (!stopper_c) {
         std::cerr << "bad arguments for \"-c\"" << std::endl;
         return 1;
       }
@@ -214,19 +215,19 @@ int main(int argc, char *argv[]) {
   solver.setInput(ins);
   solver.setSeed(srand);
   solver.setIsRand(is_rand);
-  if (stopper_w.get() && stopper_c.get()) {
+  if (stopper_w && stopper_c) {
     std::cerr << "please specify no more than 1 stopper" << std::endl;
     return 1;
   }
-  if (stopper_w.get()) {
+  if (stopper_w) {
     solver.setStopper(stopper_w);
   }
-  if (stopper_c.get()) {
+  if (stopper_c) {
     solver.setStopper(stopper_c);
   }
   solver.setIsDebug(is_debug);
   try {
-    if (solver.getStopper().get()) {
+    if (solver.getStopper()) {
       solver.solve_timeout();
     } else {
       solver.solve();
@@ -252,4 +253,3 @@ int main(int argc, char *argv[]) {
   }
   return 0;
 }
-
